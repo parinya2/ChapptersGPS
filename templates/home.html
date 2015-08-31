@@ -1,0 +1,44 @@
+<div class="container"  style="width:40%; float:left;" >
+  <table class="table table-responsive table-hover table-center-header">
+    <thead>
+      <tr>
+        <th>Vehicle</th>        
+        <th>Speed</th>
+        <th>Status</th>
+        <th>Detail</th>
+        <th class="th-td-hidden">Lat</th>
+        <th class="th-td-hidden">Lon</th>
+      <tr>
+    <thead>
+    <tbody>
+      <tr ng-repeat="data in allData">
+        <td class="td-align-center" ng-click="relocateHomeGoogleMap(data.Lat, data.Lon)">{{data.LicensePlate}}</td>        
+        <td class="td-align-center" ng-click="relocateHomeGoogleMap(data.Lat, data.Lon)">{{data.Speed}}</td>
+        <td class="td-align-center" ng-click="relocateHomeGoogleMap(data.Lat, data.Lon)">{{data.Status}}</td>
+        <td class="td-align-center" ng-click="showVehicleDetail(data)"><span class="glyphicon glyphicon-zoom-in"></span></td>
+        <td class="th-td-hidden">{{data.Lat}}</td>
+        <td class="th-td-hidden">{{data.Lon}}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="container" id="homeGoogleMap" style="width:50%; height: 400px;">
+
+</div>
+
+<div id="vehicleDetailModal" class="modal fade">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 id="vehicleDetailTitle" class="modal-title">Vehicle Detail</h4>
+      </div>
+      <div class="modal-body">
+        <p>Hello</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>      
+    </div>
+  </div>
+</div>

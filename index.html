@@ -16,7 +16,7 @@
       text-align: center;
     }
     .td-align-left {
-      text-align: left;
+      text-align: left; 
     }
     .th-td-hidden {
       display: none;
@@ -76,8 +76,12 @@
 <script src="http://maps.googleapis.com/maps/api/js?language=th"></script>
 <script>
   var jQuery = $.noConflict();
-  var deviceListData = [];
-  var geocoder = new google.maps.Geocoder;
+  var globalDeviceList = [];
+  var globalMergedDataList = [];
+  var globalGeocoder = new google.maps.Geocoder;
+  var homeGoogleMap;
+  var homeGoogleMapMarkers = [];
+  var googleMapInfoWindow = new google.maps.InfoWindow({});
 
   function selectMenu(menuIndex) {
     var targetMenuID = '#menu' + menuIndex;

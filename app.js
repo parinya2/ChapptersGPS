@@ -4,7 +4,7 @@ angular.module('gpsApp', ['ngRoute'])
     
     $scope.showVehicleDetail = function(data) {            
       var latlng = {lat: parseFloat(data.Lat), lng: parseFloat(data.Lon)};
-      geocoder.geocode({'location': latlng}, function(results, status) {
+      globalGeocoder.geocode({'location': latlng}, function(results, status) {
         if (status === google.maps.GeocoderStatus.OK) {
           if (results[0]) {
             jQuery('#vehicleDetailTitle').text(results[0].formatted_address);
@@ -25,39 +25,63 @@ angular.module('gpsApp', ['ngRoute'])
       homeGoogleMap.setCenter(new google.maps.LatLng(parseFloat(lat), parseFloat(lon)));
     };
 
-    $scope.drawMarkerOnHomeGoogleMap = function(gpsDataList) {
+    function drawMarkerOnHomeGoogleMap(mergedDataList) {
       homeGoogleMap = new google.maps.Map(document.getElementById('homeGoogleMap'));       
-      for (var i in gpsDataList) {
-        var lat = gpsDataList[i].Lat;
-        var lon = gpsDataList[i].Lon;
+      for (var i = 0; i < mergedDataList.length; i++) {
+        var lat = mergedDataList[i].Lat;
+        var lon = mergedDataList[i].Lon;
+        var deviceID = mergedDataList[i].DeviceID;
         var center = new google.maps.LatLng(parseFloat(lat), parseFloat(lon));        
         homeGoogleMap.setCenter(center)
         
-        var marker=new google.maps.Marker({position:center});
-        marker.setMap(homeGoogleMap);
+        var marker = new google.maps.Marker({
+          position: center,
+          map: homeGoogleMap,
+          title: deviceID
+        });
+
+        google.maps.event.addListener(marker, 'click', function () {
+         
+          var targetData;   
+            
+          for (var i = 0; i < globalMergedDataList.length; i++) {          
+            var tmpData = globalMergedDataList[i];
+            if (tmpData.DeviceID == this.title) {
+              targetData = tmpData;              
+              break;
+            }
+          }
+          renderMarkerDescription(globalGeocoder, homeGoogleMap, googleMapInfoWindow, this, targetData);
+
+        });
       }
+
       homeGoogleMap.setZoom(12);
       homeGoogleMap.setMapTypeId(google.maps.MapTypeId.ROADMAP);
     }
 
-    $scope.getAddressFromLatLon = function(latStr, lonStr) {
-      var latlng = {lat: parseFloat(latStr), lng: parseFloat(lonStr)};
+    function renderMarkerDescription(geocoder, map, infoWindow, marker, targetData) {
+      var latlng = {lat: parseFloat(targetData.Lat), lng: parseFloat(targetData.Lon)};
       geocoder.geocode({'location': latlng}, function(results, status) {
+        var markerAddress = ' - ';
         if (status === google.maps.GeocoderStatus.OK) {
           if (results[0]) {
-            console.log('addr: ' + results[0].formatted_address);
-            return results[0].formatted_address;
-          } else {
-            window.alert('No results found');
+            var markerAddress = results[0].formatted_address                                
           }
-        } else {
-          window.alert('Geocoder failed due to: ' + status);
-        }
+        } 
+        var markerDesc = '<div style="width: 250px">' +
+                         '<table>' + 
+                         '<tr><td style="width: 80px"> ทะเบียน : </td> <td>' + targetData.LicensePlate + '</td></tr>' + 
+                         '<tr><td style="width: 80px"> ที่อยู่ : </td> <td>' + markerAddress + '</td></tr>' +
+                         '<tr><td style="width: 80px"> คนขับ : </td> <td>' + targetData.Driver + '</td></tr>' +                         
+                         '</table>' + 
+                         '</div>';
+        infoWindow.setContent(markerDesc);
+        infoWindow.open(map, marker);
       });
-      return "";
     }
 
-    $scope.mergeJSONByDeviceID = function(deviceList, gpsList) {
+    function mergeJSONByDeviceID(deviceList, gpsList) {
       var result = [];
       var keyDeviceID = 'DeviceID';
       var keySpeed = 'Speed';
@@ -85,7 +109,7 @@ angular.module('gpsApp', ['ngRoute'])
             newObj[keyLat] = gpsObj[keyLat];
             newObj[keyLon] = gpsObj[keyLon];
             newObj[keyLicensePLate] = deviceObj[keyLicensePLate];
-            newObj[keyDriver] = gpsObj[keyDriver];
+            newObj[keyDriver] = deviceObj[keyDriver];
 
             result.push(newObj);  
             break;
@@ -98,24 +122,26 @@ angular.module('gpsApp', ['ngRoute'])
 
     selectMenu(0);
 
-    if (deviceListData.length == 0) {
-      $http.get("http://127.0.0.1:8080/gps-tracker-web/data-json/device-list-data.json")
+    if (globalDeviceList.length == 0) {
+      $http.get("http://127.0.0.1:8080/chappters-gps/data-json/device-list-data.json")
         .success(function(deviceResponse) {
-        deviceListData = deviceResponse;
+        globalDeviceList = deviceResponse;
         
-        $http.get("http://127.0.0.1:8080/gps-tracker-web/data-json/gps-data.json")
+        $http.get("http://127.0.0.1:8080/chappters-gps/data-json/gps-data.json")
           .success(function(gpsResponse) {
-            var mergedData = $scope.mergeJSONByDeviceID(deviceListData, gpsResponse);
+            var mergedData = mergeJSONByDeviceID(globalDeviceList, gpsResponse);
+            globalMergedDataList = mergedData;
             $scope.allData = mergedData;
-            $scope.drawMarkerOnHomeGoogleMap(mergedData);
+            drawMarkerOnHomeGoogleMap(mergedData);
           }) 
       })
     } else {
-      $http.get("http://127.0.0.1:8080/gps-tracker-web/data-json/gps-data.json")
+      $http.get("http://127.0.0.1:8080/chappters-gps/data-json/gps-data.json")
         .success(function(gpsResponse) {
-          var mergedData = $scope.mergeJSONByDeviceID(deviceListData, gpsResponse);
+          var mergedData = mergeJSONByDeviceID(globalDeviceList, gpsResponse);
+          globalMergedDataList = mergedData;
           $scope.allData = mergedData;
-          $scope.drawMarkerOnHomeGoogleMap(mergedData);
+          drawMarkerOnHomeGoogleMap(mergedData);
         })      
     }
 
@@ -161,14 +187,14 @@ angular.module('gpsApp', ['ngRoute'])
 
     selectMenu(1);
 
-    if (deviceListData.length == 0) {
-      $http.get("http://127.0.0.1:8080/gps-tracker-web/data-json/device-list-data.json")
+    if (globalDeviceList.length == 0) {
+      $http.get("http://127.0.0.1:8080/chappters-gps/data-json/device-list-data.json")
         .success(function(response) {
           $scope.deviceList = response;
-          deviceListData = response;      
+          globalDeviceList = response;      
       })
     } else {
-      $scope.deviceList = deviceListData;      
+      $scope.deviceList = globalDeviceList;      
     } 
 
     jQuery(function () {

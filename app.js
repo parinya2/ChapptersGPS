@@ -40,8 +40,7 @@ angular.module('gpsApp', ['ngRoute'])
           title: deviceID
         });
 
-        google.maps.event.addListener(marker, 'click', function () {
-         
+        google.maps.event.addListener(marker, 'click', function () {         
           var targetData;   
             
           for (var i = 0; i < globalMergedDataList.length; i++) {          
@@ -52,7 +51,6 @@ angular.module('gpsApp', ['ngRoute'])
             }
           }
           renderMarkerDescription(globalGeocoder, homeGoogleMap, googleMapInfoWindow, this, targetData);
-
         });
       }
 
@@ -161,8 +159,64 @@ angular.module('gpsApp', ['ngRoute'])
       historyGoogleMap.setCenter(center)
     }
 
-    $scope.drawFuelGraph = function() {
+    $scope.loadHistoryData = function(deviceID, startDateTime, endDateTime) {
+      
+      waitingDialog.show('กรุณารอสักครู่ ...');
+      setTimeout(function(){
+          $http.get("http://127.0.0.1:8080/chappters-gps/data-json/history-data.json")
+            .success(function(historyResponse) {          
+              $scope.allData = historyResponse;
+              drawMarkerAndLineOnHistoryGoogleMap(historyResponse);
+              drawFuelGraph(true);
+              waitingDialog.hide();
+            })           
+      }, 2000);
+
+    }
+
+    $scope.relocateHistoryGoogleMap = function(lat, lon) {
+      historyGoogleMap.setZoom(16);
+      historyGoogleMap.setCenter(new google.maps.LatLng(parseFloat(lat), parseFloat(lon)));
+    };
+
+    function drawMarkerAndLineOnHistoryGoogleMap(historyDataList) {    
+      var flightPlanCoordinates = [];
+
+      for (var i = 0; i < historyDataList.length; i++) {
+        var lat = historyDataList[i].Lat;
+        var lon = historyDataList[i].Lon;        
+        var center = new google.maps.LatLng(parseFloat(lat), parseFloat(lon));        
+        historyGoogleMap.setCenter(center)
+        
+        var marker = new google.maps.Marker({
+          position: center,
+          map: historyGoogleMap
+        });
+
+        flightPlanCoordinates.push({lat: parseFloat(lat), lng: parseFloat(lon)});
+      }
+
+      var flightPath = new google.maps.Polyline({
+        path: flightPlanCoordinates,
+        geodesic: true,
+        strokeColor: '#FF0000',
+        strokeOpacity: 1.0,
+        strokeWeight: 4
+      });
+
+      flightPath.setMap(historyGoogleMap);
+
+      historyGoogleMap.setZoom(14);
+      historyGoogleMap.setMapTypeId(google.maps.MapTypeId.ROADMAP);
+    }
+
+    function drawFuelGraph(flag) {
       var randomScalingFactor = function(){ return Math.round(Math.random()*100)};
+      var randomData = [randomScalingFactor(),randomScalingFactor(),randomScalingFactor(),randomScalingFactor(),randomScalingFactor(),randomScalingFactor(),randomScalingFactor()];
+      if (!flag) {
+        randomData = [];
+      }
+
       var lineChartData = {
         labels : ["January","February","March","April","May","June","July"],
         datasets : [
@@ -174,7 +228,7 @@ angular.module('gpsApp', ['ngRoute'])
             pointStrokeColor : "#fff",
             pointHighlightFill : "#fff",
             pointHighlightStroke : "rgba(151,187,205,1)",
-           data : [randomScalingFactor(),randomScalingFactor(),randomScalingFactor(),randomScalingFactor(),randomScalingFactor(),randomScalingFactor(),randomScalingFactor()]
+            data : randomData
           }
         ]
       }
@@ -213,10 +267,21 @@ angular.module('gpsApp', ['ngRoute'])
       jQuery("#historyEndDateTimePicker").on("dp.change",function (e) {
           jQuery('#historyStartDateTimePicker').data("DateTimePicker").maxDate(e.date);
       });
+
+      jQuery('input[name="historyDateRange"]').daterangepicker({
+        timePicker: true,
+        timePicker24Hour: true,
+        timePickerIncrement: 15,
+        locale: {
+            format: 'DD/MM/YYYY   (hh:mm A)'
+        },
+        dateLimit: {
+          days: 3
+        }
+    });
     });
 
-    
-    $scope.drawFuelGraph();
+    drawFuelGraph(false);
     $scope.initHistoryGoogleMap();
   })
   .controller('SettingController', function($scope) {

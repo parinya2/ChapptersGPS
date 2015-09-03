@@ -7,6 +7,8 @@
   <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
   <link rel="stylesheet" href="css/sticky-footer.css">
   <link rel="stylesheet" href="css/bootstrap-datetimepicker.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.css" />
+
 
   <style>
     .table-center-header th {
@@ -40,12 +42,12 @@
     </div>
     <div ng-controller="NavBarController">
       <ul class="nav navbar-nav">
-        <li id="menu0" onclick="selectMenu(0)"><a href="#/home">Home</a></li>
-        <li id="menu1" onclick="selectMenu(1)"><a href="#/history">History</a></li>
-        <li id="menu2" onclick="selectMenu(2)"><a href="#/setting">Setting</a></li>
+        <li id="menu0" onclick="selectMenu(0)"><a href="#/home">หน้าหลัก</a></li>
+        <li id="menu1" onclick="selectMenu(1)"><a href="#/history">ดูย้อนหลัง</a></li>
+        <li id="menu2" onclick="selectMenu(2)"><a href="#/setting">ตั้งค่า</a></li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
-        <li><a ng-click="logout()" href=""><span class="glyphicon glyphicon-log-out"></span> Log out</a></li>
+        <li><a ng-click="logout()" href=""><span class="glyphicon glyphicon-log-out"></span> ออกจากระบบ</a></li>
       </ul>      
     </div>
   </div>
@@ -71,8 +73,10 @@
 <script src="js/chartjs/chart.js"></script>
 <script src="js/chartjs/chart.min.js"></script>
 <script src="js/momentjs/moment-with-locales.js"></script>
+<script src="js/waitingjs/bootstrap-waitingfor.js"></script>
 <!-- Date Time Picker Source: http://eonasdan.github.io/bootstrap-datetimepicker/ -->
 <script src="js/datetimepickerjs/bootstrap-datetimepicker.js"></script> 
+<script src="//cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.js"></script>
 <script src="http://maps.googleapis.com/maps/api/js?language=th"></script>
 <script>
   var jQuery = $.noConflict();

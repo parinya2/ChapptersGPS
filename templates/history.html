@@ -36,10 +36,13 @@
         </div>
     </div>  
     <div  class="btn-group pull-right" role="group">
-      <button type="button" class="btn btn-success" ng-click="drawFuelGraph()">Apply</button>
+      <button type="button" class="btn btn-success" ng-click="loadHistoryData(0,0,0)">Apply</button>
     </div>  
   </div>
 
+  <div class="container" style="display:none">
+    <input type="text" name="historyDateRange" style="width:300px" value="01/01/2015 1:30 PM - 01/01/2015 2:00 PM" />
+  </div>
 
   <div style="width:100%; clear:both;">
     <div>
@@ -47,8 +50,48 @@
     </div>
   </div>
 
+  <div class="container"  style="width:40%; float:left;" >
+    <table class="table table-responsive table-hover table-center-header">
+      <thead>
+        <tr>
+          <th>ลำดับ</th>        
+          <th>วัน-เวลา</th>
+          <th>ความเร็ว</th>
+          <th>สถานะ</th>
+          <th class="th-td-hidden">Lat</th>
+          <th class="th-td-hidden">Lon</th>
+        <tr>
+      <thead>
+      <tbody>
+        <tr ng-repeat="data in allData">
+          <td class="td-align-center" ng-click="relocateHistoryGoogleMap(data.Lat, data.Lon)">{{$index + 1}}</td>
+          <td class="td-align-center" ng-click="relocateHistoryGoogleMap(data.Lat, data.Lon)">{{data.DateTime}}</td>          
+          <td class="td-align-center" ng-click="relocateHistoryGoogleMap(data.Lat, data.Lon)">{{data.Speed}}</td>
+          <td class="td-align-center" ng-click="relocateHistoryGoogleMap(data.Lat, data.Lon)">{{data.Status}}</td>
+          <td class="th-td-hidden">{{data.Lat}}</td>
+          <td class="th-td-hidden">{{data.Lon}}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
   <div class="container" id="historyGoogleMap" style="width:50%; height: 400px;">
 
+  </div>
+
+  <div class="modal fade" id="pleaseWaitDialog" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>กรุณารอสักครู่...</h3>
+        </div>
+        <div class="modal-body">
+          <div class="progress progress-striped active">
+            <div class="bar" style="width: 100%;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
 

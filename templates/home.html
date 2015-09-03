@@ -2,16 +2,18 @@
   <table class="table table-responsive table-hover table-center-header">
     <thead>
       <tr>
-        <th>Vehicle</th>        
-        <th>Speed</th>
-        <th>Status</th>
-        <th>Detail</th>
+        <th>ลำดับ</th>
+        <th>พาหนะ</th>
+        <th>ความเร็ว</th>
+        <th>สถานะ</th>
+        <th>รายละเอียด</th>
         <th class="th-td-hidden">Lat</th>
         <th class="th-td-hidden">Lon</th>
       <tr>
     <thead>
     <tbody>
       <tr ng-repeat="data in allData">
+        <td class="td-align-center" ng-click="relocateHomeGoogleMap(data.Lat, data.Lon)">{{$index + 1}}</td>
         <td class="td-align-center" ng-click="relocateHomeGoogleMap(data.Lat, data.Lon)">{{data.LicensePlate}}</td>        
         <td class="td-align-center" ng-click="relocateHomeGoogleMap(data.Lat, data.Lon)">{{data.Speed}}</td>
         <td class="td-align-center" ng-click="relocateHomeGoogleMap(data.Lat, data.Lon)">{{data.Status}}</td>

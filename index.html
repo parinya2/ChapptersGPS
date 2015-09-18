@@ -86,6 +86,8 @@
   var homeGoogleMap;
   var homeGoogleMapMarkers = [];
   var googleMapInfoWindow = new google.maps.InfoWindow({});
+  var globalURLPrefix = 'http://127.0.0.1:8080/chappters-gps';
+  var globalHistoryFuelChart;
 
   function selectMenu(menuIndex) {
     var targetMenuID = '#menu' + menuIndex;

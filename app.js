@@ -121,7 +121,7 @@ angular.module('gpsApp', ['ngRoute'])
     selectMenu(0);
 
     if (globalDeviceList.length == 0) {
-      $http.get("http://127.0.0.1:8080/chappters-gps/data-json/device-list-data.json")
+      $http.get(globalURLPrefix + "/data-json/device-list-data.json")
         .success(function(deviceResponse) {
         globalDeviceList = deviceResponse;
         
@@ -134,7 +134,7 @@ angular.module('gpsApp', ['ngRoute'])
           }) 
       })
     } else {
-      $http.get("http://127.0.0.1:8080/chappters-gps/data-json/gps-data.json")
+      $http.get(globalURLPrefix + "/data-json/gps-data.json")
         .success(function(gpsResponse) {
           var mergedData = mergeJSONByDeviceID(globalDeviceList, gpsResponse);
           globalMergedDataList = mergedData;
@@ -163,11 +163,11 @@ angular.module('gpsApp', ['ngRoute'])
       
       waitingDialog.show('กรุณารอสักครู่ ...');
       setTimeout(function(){
-          $http.get("http://127.0.0.1:8080/chappters-gps/data-json/history-data.json")
+          $http.get(globalURLPrefix + "/data-json/history-data.json")
             .success(function(historyResponse) {          
               $scope.allData = historyResponse;
               drawMarkerAndLineOnHistoryGoogleMap(historyResponse);
-              drawFuelGraph(true);
+              drawFuelGraph(true, historyResponse);
               waitingDialog.hide();
             })           
       }, 2000);
@@ -210,39 +210,56 @@ angular.module('gpsApp', ['ngRoute'])
       historyGoogleMap.setMapTypeId(google.maps.MapTypeId.ROADMAP);
     }
 
-    function drawFuelGraph(flag) {
+    function drawFuelGraph(flag, historyDataList) {
       var randomScalingFactor = function(){ return Math.round(Math.random()*100)};
-      var randomData = [randomScalingFactor(),randomScalingFactor(),randomScalingFactor(),randomScalingFactor(),randomScalingFactor(),randomScalingFactor(),randomScalingFactor()];
+      var fuelArray = [];
+      var dateTimeArray = [];
+
       if (!flag) {
-        randomData = [];
+        dateTimeArray = ["",""];
+        fuelArray = [0,100];
+      } else {
+        for (var i = 0; i < historyDataList.length; i++) {
+          var dateTime = historyDataList[i].DateTime;
+          var fuelPercentage = historyDataList[i].FuelPercentage;
+
+          dateTimeArray.push(dateTime);
+          fuelArray.push(fuelPercentage);
+        }
       }
 
       var lineChartData = {
-        labels : ["January","February","March","April","May","June","July"],
+        labels : dateTimeArray,
         datasets : [
           {
-            label: "My Second dataset",
+            label: "Fuel Graph dataset",
             fillColor : "rgba(151,187,205,0.2)",
             strokeColor : "rgba(151,187,205,1)",
             pointColor : "rgba(151,187,205,1)",
             pointStrokeColor : "#fff",
             pointHighlightFill : "#fff",
             pointHighlightStroke : "rgba(151,187,205,1)",
-            data : randomData
+            data : fuelArray
           }
         ]
       }
 
       var ctx = document.getElementById("historyFuelCanvas").getContext("2d");
-      var chart = new Chart(ctx).Line(lineChartData, {
-        responsive: true
+      if (globalHistoryFuelChart != undefined) {
+        globalHistoryFuelChart.destroy();
+      }
+        
+       globalHistoryFuelChart = new Chart(ctx).Line(lineChartData, {
+        responsive: true,
+        pointHitDetectionRadius : 5,
+        bezierCurve : false
       });    
     }
 
     selectMenu(1);
 
     if (globalDeviceList.length == 0) {
-      $http.get("http://127.0.0.1:8080/chappters-gps/data-json/device-list-data.json")
+      $http.get(globalURLPrefix + "/data-json/device-list-data.json")
         .success(function(response) {
           $scope.deviceList = response;
           globalDeviceList = response;      
@@ -281,7 +298,7 @@ angular.module('gpsApp', ['ngRoute'])
     });
     });
 
-    drawFuelGraph(false);
+    drawFuelGraph(false, []);
     $scope.initHistoryGoogleMap();
   })
   .controller('SettingController', function($scope) {

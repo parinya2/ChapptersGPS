@@ -214,11 +214,9 @@ angular.module('gpsApp', ['ngRoute'])
       var randomScalingFactor = function(){ return Math.round(Math.random()*100)};
       var fuelArray = [];
       var dateTimeArray = [];
+      var strokeColor;
 
-      if (!flag) {
-        dateTimeArray = ["",""];
-        fuelArray = [0,100];
-      } else {
+      if (flag) {
         for (var i = 0; i < historyDataList.length; i++) {
           var dateTime = historyDataList[i].DateTime;
           var fuelPercentage = historyDataList[i].FuelPercentage;
@@ -226,6 +224,11 @@ angular.module('gpsApp', ['ngRoute'])
           dateTimeArray.push(dateTime);
           fuelArray.push(fuelPercentage);
         }
+        strokeColor = "rgba(151,187,205,1)";
+      } else {
+        dateTimeArray = ["",""];
+        fuelArray = [0,100];
+        strokeColor = "rgba(255,255,255,1)";
       }
 
       var lineChartData = {
@@ -234,7 +237,7 @@ angular.module('gpsApp', ['ngRoute'])
           {
             label: "Fuel Graph dataset",
             fillColor : "rgba(151,187,205,0.2)",
-            strokeColor : "rgba(151,187,205,1)",
+            strokeColor : strokeColor,
             pointColor : "rgba(151,187,205,1)",
             pointStrokeColor : "#fff",
             pointHighlightFill : "#fff",
@@ -248,12 +251,22 @@ angular.module('gpsApp', ['ngRoute'])
       if (globalHistoryFuelChart != undefined) {
         globalHistoryFuelChart.destroy();
       }
-        
-       globalHistoryFuelChart = new Chart(ctx).Line(lineChartData, {
-        responsive: true,
-        pointHitDetectionRadius : 5,
-        bezierCurve : false
-      });    
+      
+      if (flag) {
+        globalHistoryFuelChart = new Chart(ctx).Line(lineChartData, {
+          responsive: true,
+          pointHitDetectionRadius : 5,
+          bezierCurve : false
+        });      
+      } else {
+        globalHistoryFuelChart = new Chart(ctx).Line(lineChartData, {
+          responsive: true,                  
+          pointDot : false,
+          datasetFill : false,
+          pointHitDetectionRadius : 0
+        });    
+      }
+      
     }
 
     selectMenu(1);

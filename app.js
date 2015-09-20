@@ -314,9 +314,17 @@ angular.module('gpsApp', ['ngRoute'])
     drawFuelGraph(false, []);
     $scope.initHistoryGoogleMap();
   })
+  .controller('SpeedController', function($scope) {
+    $scope.message = 'This is SpeedController';
+    selectMenu(2);
+  })
+  .controller('BoundaryController', function($scope) {
+    $scope.message = 'This is BoundaryController';
+    selectMenu(3);
+  })
   .controller('SettingController', function($scope) {
     $scope.message = 'This is SettingController';
-    selectMenu(2);
+    selectMenu(4);
   })
   .controller('NavBarController', function($scope) {
     $scope.logout = function() {
@@ -333,6 +341,14 @@ angular.module('gpsApp', ['ngRoute'])
         when('/history', {
           templateUrl: 'templates/history.html',
           controller: 'HistoryController'
+        }).
+        when('/speed', {
+          templateUrl: 'templates/speed.html',
+          controller: 'SpeedController'
+        }).
+        when('/boundary', {
+          templateUrl: 'templates/boundary.html',
+          controller: 'BoundaryController'
         }).
         when('/setting', {
           templateUrl: 'templates/setting.html',
